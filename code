@@ -1,0 +1,91 @@
+bank=read.table(file.choose(),header=TRUE, sep=";")
+dim(bank)
+names(bank)
+str(bank)
+summary(bank)
+head(bank)
+tail(bank)
+nrow(bank)
+ncol(bank)
+set.seed(1)
+x=sample(1:10,5,replace=T)
+x
+e=rnorm(5)
+e
+y=2*x+1+e
+y
+plot(x,y,xlim=c(-0.5,10.5),ylim=c(-0.5,21))
+abline(1,2)
+model=lm(y~x)
+summary(model)
+p=predict(model,as.data.frame(x))
+rbind(y,p)
+
+library(rpart)
+library(rattle)
+library(rpart.plot)
+
+bank_new2<-bank
+bank_new2$job<-as.numeric(as.factor(bank_new2$job))
+bank_new2$marital<-as.numeric(as.factor(bank_new2$marital))
+bank_new2$education<-as.numeric(as.factor(bank_new2$education))
+bank_new2$default<-as.numeric(as.factor(bank_new2$default))
+bank_new2$housing<-as.numeric(as.factor(bank_new2$housing))
+bank_new2$loan<-as.numeric(as.factor(bank_new2$loan))
+bank_new2$contact<-as.numeric(as.factor(bank_new2$contact))
+bank_new2$month<-as.numeric(as.factor(bank_new2$month))
+bank_new2$day_of_week<-as.numeric(as.factor(bank_new2$day_of_week))
+bank_new2$poutcome<-as.numeric(as.factor(bank_new2$poutcome))
+bank_new2$y<-as.numeric(as.factor(bank_new2$y))
+
+
+tree_model <-rpart(y~.,data=bank_new2,method="anova")
+summary(tree_model)
+plot(tree_model)
+text(tree_model)
+fancyRpartPlot(tree_model)
+
+
+
+pmatrix=scale(bank_new2[,-1])
+d=dist(pmatrix)
+c=hclust(d,method="ward.D2")
+plot(c)
+
+
+totwinss=c()
+for (k in 2:10){
+  k_cl=kmeans(pmatrix,k)
+  totwinss[k] <- k_cl$tot.withinss
+}
+
+plot(1:10, totwinss,
+     xlab = "Number of clusters",
+     ylab = "Total within ss")
+lines(1:10, totwinss)
+
+k_cl=kmeans(pmatrix,7)
+table(bank_new2$marital,k_cl$cluster)
+
+
+hist(bank_new2$age,col = "red")
+hist(bank_new2$age,col = "red",freq=FALSE)
+bank$salary = rnorm(nrow(bank_new2),mean = 25000, sd=10000)
+hist(bank_new2$salary,col = "Orange")
+
+tabEdMar = table(bank$education, bank$marital)
+tabEdMar
+mosaicplot(tabEdMar)
+
+library(ggplot2)
+
+
+ggplot(bank,aes(x=age, y=salary, color=y)) + geom_point()+
+  facet_wrap(~ job,scales="free_y")+
+  labs(x="AGE", y="SALARY",title="SALARY BY AGE GROUP")+
+  theme(axis.text.x=element_text(angle=90) )
+
+ggplot(bank,aes(x=job, fill=marital)) + geom_bar(position = "fill") + scale_fill_brewer(palette="Set2")+
+  facet_wrap(~ education,scales="free_y")+
+  labs(x="Job",title= "MARITAL STATUS BY JOB AND EDUCATION")+
+  theme(axis.text.x=element_text(angle=90))
