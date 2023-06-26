@@ -1,1 +1,1 @@
-# bank Marketing
+# Bank Marketing Exercise
